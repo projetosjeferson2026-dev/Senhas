@@ -293,7 +293,7 @@ function ConfigurationScreen() {
         <span className="config-icon" aria-hidden="true"><Settings2 size={26} /></span>
         <p className="eyebrow">Configuração necessária</p>
         <h1>Configure o Supabase</h1>
-        <p>Defina estas variáveis na Vercel para conectar autenticação e banco:</p>
+        <p>Preencha estas variáveis no arquivo <code>.env.local</code>, na pasta do projeto. Depois, reinicie o servidor:</p>
         <ul>
           <li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
           <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>

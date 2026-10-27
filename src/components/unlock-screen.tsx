@@ -66,8 +66,8 @@ export function UnlockScreen({
         <h1>{firstUse ? "Criar senha-mestra" : "Desbloquear cofre"}</h1>
         <p className="muted unlock-copy">
           {firstUse
-            ? "Ela será usada para criptografar tudo antes do envio ao Supabase. Não poderá ser recuperada."
-            : "Sua senha-mestra transforma os dados criptografados em informações legíveis somente neste dispositivo."}
+            ? "Escolha uma senha com pelo menos 12 caracteres para proteger suas credenciais. Guarde-a bem: ela não pode ser recuperada."
+            : "Digite sua senha-mestra para acessar suas senhas, tokens e chaves."}
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -100,7 +100,7 @@ export function UnlockScreen({
 
           <button className="primary-button" disabled={submitting} type="submit">
             {submitting
-              ? "Derivando chave..."
+              ? "Abrindo seu cofre..."
               : firstUse
                 ? "Criar e desbloquear"
                 : "Desbloquear"}

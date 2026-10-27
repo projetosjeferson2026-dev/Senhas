@@ -1,0 +1,222 @@
+.auth-page {
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(420px,.95fr);
+}
+.auth-brand {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+  min-height:100vh;
+  padding:48px clamp(38px,7vw,108px);
+  background:radial-gradient(ellipse at 0% 100%, #221541 0%, #0c0f18 65%);
+  border-right:1px solid var(--border-soft);
+}
+.auth-brand::before, .auth-brand::after {
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+}
+.auth-brand::before {
+  width:430px;
+  height:430px;
+  left:-160px;
+  bottom:-170px;
+  background:rgba(124,58,237,.12);
+}
+.auth-brand::after {
+  width:260px;
+  height:260px;
+  right:-120px;
+  top:16%;
+  border:1px solid rgba(139,92,246,.15);
+}
+.auth-brand h1 {
+  position:relative;
+  max-width:680px;
+  margin:0;
+  font-size:clamp(44px,5.1vw,76px);
+  line-height:1.08;
+  letter-spacing:-.055em;
+  font-weight:650;
+}
+.auth-lead {
+  position:relative;
+  max-width:570px;
+  margin:28px 0 0;
+  color:#a7adbd;
+  font-size:17px;
+  line-height:1.7;
+}
+.security-note {
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:max-content;
+  max-width:100%;
+  padding:12px 15px;
+  border:1px solid rgba(86,216,160,.18);
+  border-radius:12px;
+  background:rgba(86,216,160,.07);
+  color:#b9efd8;
+  font-size:13px;
+}
+.auth-panel {
+  display:grid;
+  place-items:center;
+  padding:34px;
+  background:#090b12;
+}
+.auth-card {
+  width:min(100%,430px);
+  padding:36px;
+  border:1px solid var(--border);
+  border-radius:22px;
+  background:var(--panel);
+  box-shadow:var(--shadow);
+}
+.auth-card-icon {
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:48px;
+  margin-bottom:24px;
+  border-radius:14px;
+  background:var(--accent-soft);
+  color:#c4b5fd;
+}
+.auth-card h2, .unlock-card h1, .config-card h1 {
+  margin:0;
+  letter-spacing:-.035em;
+  font-size:29px;
+}
+.auth-card > .muted {
+  margin:9px 0 24px;
+  font-size:14px;
+}
+.auth-card .primary-button {
+  margin-top:22px;
+}
+.auth-footnote {
+  margin:17px 0 0;
+  color:var(--muted-2);
+  text-align:center;
+  font-size:12px;
+}
+.simple-header {
+  position:absolute;
+  inset:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:30px 40px;
+  z-index:2;
+}
+.unlock-page, .config-page {
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:110px 24px 48px;
+  background:#0a0c13;
+}
+.unlock-card, .config-card {
+  width:min(100%,500px);
+  padding:42px;
+  text-align:center;
+  border:1px solid var(--border);
+  border-radius:24px;
+  background:var(--panel);
+  box-shadow:var(--shadow);
+}
+.unlock-orbit {
+  display:grid;
+  place-items:center;
+  width:90px;
+  height:90px;
+  margin:0 auto 28px;
+  border:1px solid rgba(139,92,246,.25);
+  border-radius:50%;
+  background:rgba(139,92,246,.06);
+}
+.unlock-orbit span {
+  display:grid;
+  place-items:center;
+  width:58px;
+  height:58px;
+  border-radius:18px;
+  background:var(--accent-soft);
+  color:#c4b5fd;
+}
+.unlock-copy {
+  margin:12px auto 25px;
+  max-width:390px;
+  font-size:14px;
+  line-height:1.65;
+}
+.unlock-card form {
+  text-align:left;
+}
+.unlock-card .primary-button {
+  margin-top:22px;
+}
+.zero-knowledge-note {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  margin-top:22px;
+  color:#9ea5b9;
+  font-size:12px;
+}
+.config-icon {
+  display:grid;
+  place-items:center;
+  width:52px;
+  height:52px;
+  margin:0 auto 24px;
+  border-radius:15px;
+  color:#c4b5fd;
+  background:var(--accent-soft);
+}
+.config-card > p:not(.eyebrow) {
+  color:var(--muted);
+  line-height:1.6;
+}
+.config-card ul {
+  display:grid;
+  gap:8px;
+  margin:24px 0;
+  padding:0;
+  list-style:none;
+  text-align:left;
+}
+.config-card li {
+  padding:11px 13px;
+  border:1px solid var(--border-soft);
+  border-radius:9px;
+  background:#0d1018;
+  color:#c4b5fd;
+  font-size:12px;
+  overflow-wrap:anywhere;
+}
+.loading-screen {
+  min-height:100vh;
+  display:grid;
+  place-content:center;
+  justify-items:center;
+  gap:14px;
+  color:var(--muted);
+}
+.spin {
+  animation:spin 1s linear infinite;
+  color:#a78bfa;
+}
+@keyframes spin {
+  to {
+    transform:rotate(360deg);
+  }
+}

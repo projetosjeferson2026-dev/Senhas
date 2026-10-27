@@ -39,12 +39,26 @@ cifrados **no navegador** e o Supabase recebe apenas texto cifrado, IV e metadad
 ```
 src/app/          App Router: layout, página única e estilos globais
 src/components/   Telas e componentes de interface (testes ao lado de cada arquivo)
-src/lib/          Criptografia, modelo do cofre, backend Supabase
+src/lib/          Criptografia, modelo, categorias e backend Supabase
+src/styles/       CSS separado: base, acesso, painel, modal e responsividade
 supabase/         Migration SQL com tabelas, grants e políticas RLS
 .github/          Workflow de CI
 ```
 
 ## Como rodar
+
+### Windows: iniciar com dois cliques
+
+Execute **`iniciar-servidor.bat`** na pasta do projeto. Ele verifica o Node.js,
+instala as dependências caso estejam ausentes e inicia em **http://localhost:3000**.
+Abra esse endereço no navegador e mantenha o terminal aberto enquanto usar o app.
+Para encerrar, pressione **Ctrl+C** no terminal.
+
+Se `.env.local` ainda não existir, o script cria uma cópia de `.env.example` e
+aguarda você preencher as três variáveis descritas abaixo. Depois, execute o BAT novamente.
+Se a porta 3000 estiver ocupada, pare o servidor anterior antes de iniciar outro.
+
+### Executar pelo terminal
 
 Requisitos: Node.js 24 (veja `.nvmrc`) e um projeto Supabase.
 
@@ -85,6 +99,14 @@ Sem as três variáveis o app mostra a tela de configuração em vez do login.
 
 > Nunca coloque a `SUPABASE_SERVICE_ROLE_KEY` no repositório, em variáveis `NEXT_PUBLIC_*` ou no
 > navegador — ela ignora RLS.
+
+## Uso no dia a dia
+
+1. Entre com a conta autorizada e desbloqueie usando a senha-mestra.
+2. Clique em **Novo item** para salvar uma senha, token ou chave.
+3. Use a pesquisa, as categorias ou **Favoritos** para encontrar suas credenciais.
+4. Use **Copiar** para copiar a senha e **Editar** para alterar os dados.
+5. Clique em **Limpar filtros** para voltar a todos os itens ou **Bloquear** para fechar o cofre.
 
 ## Scripts
 

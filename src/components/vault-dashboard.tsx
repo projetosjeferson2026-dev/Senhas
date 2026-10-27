@@ -1,15 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Copy, Database, Edit3, Eye, EyeOff, GitBranch, Globe2, KeyRound,
-  LayoutGrid, LockKeyhole, LogOut, MoreHorizontal, Plus, Search,
-  ShieldCheck, Star, Trash2, Zap,
-} from "lucide-react";
+import { Copy, Edit3, Eye, EyeOff, LockKeyhole, LogOut, Plus, Search, ShieldCheck, Star, Trash2 } from "lucide-react";
+import { categoryFilters, getCategory } from "@/lib/vault-categories";
 
 import {
   filterEntries,
-  type VaultCategory,
   type VaultCategoryFilter,
   type VaultEntry,
 } from "@/lib/vault";
@@ -22,38 +18,6 @@ type VaultDashboardProps = {
   onEdit: (entry: VaultEntry) => void;
   onLock: () => void;
   onSignOut: () => void;
-};
-
-const categoryMeta: Array<{
-  id: VaultCategoryFilter;
-  label: string;
-  icon: typeof LayoutGrid;
-}> = [
-  { id: "all", label: "Todos", icon: LayoutGrid },
-  { id: "site", label: "Sites", icon: Globe2 },
-  { id: "api", label: "APIs", icon: KeyRound },
-  { id: "database", label: "Bancos", icon: Database },
-  { id: "github", label: "GitHub", icon: GitBranch },
-  { id: "vercel", label: "Vercel", icon: Zap },
-  { id: "other", label: "Outros", icon: MoreHorizontal },
-];
-
-const entryIcons: Record<VaultCategory, typeof Globe2> = {
-  site: Globe2,
-  api: KeyRound,
-  database: Database,
-  github: GitBranch,
-  vercel: Zap,
-  other: MoreHorizontal,
-};
-
-const categoryLabels: Record<VaultCategory, string> = {
-  site: "Site",
-  api: "API / token",
-  database: "Banco de dados",
-  github: "GitHub",
-  vercel: "Vercel",
-  other: "Outro",
 };
 
 export function VaultDashboard({
@@ -69,11 +33,21 @@ export function VaultDashboard({
   const [query, setQuery] = useState("");
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [copyError, setCopyError] = useState("");
 
   const visibleEntries = useMemo(
-    () => filterEntries(entries, query, category),
-    [entries, query, category],
+    () => filterEntries(entries, query, category).filter((entry) => !favoritesOnly || entry.favorite),
+    [entries, query, category, favoritesOnly],
   );
+
+  const hasFilters = Boolean(query || category !== "all" || favoritesOnly);
+
+  function resetFilters() {
+    setQuery("");
+    setCategory("all");
+    setFavoritesOnly(false);
+  }
 
   function countFor(filter: VaultCategoryFilter) {
     return filter === "all"
@@ -91,7 +65,13 @@ export function VaultDashboard({
   }
 
   async function copySecret(entry: VaultEntry) {
-    await navigator.clipboard.writeText(entry.secret);
+    setCopyError("");
+    try {
+      await navigator.clipboard.writeText(entry.secret);
+    } catch {
+      setCopyError("Não foi possível copiar. Permita o acesso à área de transferência no navegador.");
+      return;
+    }
     setCopiedId(entry.id);
     window.setTimeout(() => setCopiedId(null), 1800);
     window.setTimeout(async () => {
@@ -106,7 +86,7 @@ export function VaultDashboard({
   }
 
   const selectedLabel =
-    categoryMeta.find((item) => item.id === category)?.label ?? "Todos";
+    categoryFilters.find((item) => item.id === category)?.label ?? "Todos";
 
   return (
     <div className="vault-shell">
@@ -118,7 +98,7 @@ export function VaultDashboard({
 
         <nav aria-label="Categorias do cofre" className="category-nav">
           <p className="nav-label">Coleções</p>
-          {categoryMeta.map(({ id, label, icon: Icon }) => (
+          {categoryFilters.map(({ id, label, icon: Icon }) => (
             <button
               aria-pressed={category === id}
               className={category === id ? "category-item active" : "category-item"}
@@ -135,7 +115,7 @@ export function VaultDashboard({
 
         <div className="sidebar-security">
           <ShieldCheck size={18} aria-hidden="true" />
-          <div><b>Cofre protegido</b><span>AES-256-GCM</span></div>
+          <div><b>Cofre protegido</b><span>Bloqueio após 5 min sem uso</span></div>
         </div>
 
         <div className="sidebar-account">
@@ -149,9 +129,9 @@ export function VaultDashboard({
 
       <main className="vault-main">
         <header className="vault-topbar">
-          <div><p className="eyebrow">Cofre pessoal</p><h1>Minhas credenciais</h1></div>
+          <div><p className="eyebrow">Seu espaço seguro</p><h1>Minhas credenciais</h1><p className="page-description">Suas senhas, tokens e chaves em um só lugar.</p></div>
           <div className="topbar-actions">
-            <button className="secondary-button" onClick={onLock} type="button">
+            <button aria-label="Bloquear cofre" className="secondary-button" onClick={onLock} type="button">
               <LockKeyhole size={16} aria-hidden="true" /> Bloquear
             </button>
             <button className="primary-button compact" onClick={onCreate} type="button">
@@ -159,6 +139,12 @@ export function VaultDashboard({
             </button>
           </div>
         </header>
+
+        <section className="vault-overview" aria-label="Resumo do cofre">
+          <div><span className="overview-icon"><ShieldCheck size={21} aria-hidden="true" /></span><div><b>{entries.length}</b><span>Credenciais salvas</span></div></div>
+          <div><span className="overview-icon warm"><Star size={21} aria-hidden="true" /></span><div><b>{entries.filter((entry) => entry.favorite).length}</b><span>Favoritos</span></div></div>
+          <div className="overview-note"><LockKeyhole size={18} aria-hidden="true" /><p>Proteção no seu dispositivo<span>Só você tem a senha-mestra.</span></p></div>
+        </section>
 
         <section className="vault-toolbar" aria-label="Pesquisar credenciais">
           <label className="search-box">
@@ -171,11 +157,11 @@ export function VaultDashboard({
               value={query}
             />
           </label>
-          <div className="results-count"><b>{visibleEntries.length}</b><span>{visibleEntries.length === 1 ? "item" : "itens"}</span></div>
+          <button aria-label="Mostrar favoritos" aria-pressed={favoritesOnly} className="secondary-button favorite-filter" onClick={() => setFavoritesOnly((value) => !value)} type="button"><Star size={16} aria-hidden="true" /> Favoritos</button>
         </section>
 
         <div className="mobile-categories" aria-label="Filtro de categoria">
-          {categoryMeta.map(({ id, label }) => (
+          {categoryFilters.map(({ id, label }) => (
             <button aria-pressed={category === id} key={id} onClick={() => setCategory(id)} type="button">
               {label} <span>{countFor(id)}</span>
             </button>
@@ -184,13 +170,17 @@ export function VaultDashboard({
 
         <section className="entries-section">
           <div className="section-heading">
-            <div><h2>{selectedLabel}</h2><p>Dados descriptografados apenas nesta sessão.</p></div>
+            <div><h2>{favoritesOnly ? `Favoritos · ${selectedLabel}` : selectedLabel} <span className="section-count">{visibleEntries.length}</span></h2><p>Use Copiar para a senha ou Editar para alterar o item.</p></div>
+            {hasFilters ? <button className="text-button" onClick={resetFilters} type="button">Limpar filtros</button> : null}
           </div>
+
+          {copyError ? <p className="form-error" role="alert">{copyError}</p> : null}
+          <span className="sr-only" role="status">{copiedId ? "Senha copiada para a área de transferência." : ""}</span>
 
           {visibleEntries.length ? (
             <div className="credential-grid">
               {visibleEntries.map((entry) => {
-                const Icon = entryIcons[entry.category];
+                const { icon: Icon, singular: categoryLabel } = getCategory(entry.category);
                 const isRevealed = revealed.has(entry.id);
                 return (
                   <article className="credential-card" key={entry.id}>
@@ -198,13 +188,13 @@ export function VaultDashboard({
                       <span className={`credential-icon category-${entry.category}`} aria-hidden="true"><Icon size={19} /></span>
                       <div className="credential-title">
                         <div><h3>{entry.title}</h3>{entry.favorite ? <Star size={14} fill="currentColor" aria-label="Favorito" /> : null}</div>
-                        <span>{categoryLabels[entry.category]}</span>
+                        <span>{categoryLabel}</span>
                       </div>
                     </div>
 
                     <div className="credential-detail"><span>Usuário</span><b>{entry.username || "Não informado"}</b></div>
                     <div className="credential-detail secret-detail">
-                      <span>Segredo</span>
+                      <span>Senha ou chave</span>
                       <div>
                         <code>{isRevealed ? entry.secret : "••••••••••••"}</code>
                         <button
@@ -229,8 +219,8 @@ export function VaultDashboard({
           ) : (
             <div className="empty-state">
               <ShieldCheck size={34} aria-hidden="true" />
-              <h3>Nenhuma credencial encontrada</h3>
-              <p>Ajuste a busca ou adicione o primeiro item desta categoria.</p>
+              <h3>{entries.length ? "Nenhuma credencial encontrada" : "Seu cofre está pronto"}</h3>
+              <p>{entries.length ? "Tente outro termo ou limpe os filtros para ver seus itens." : "Adicione sua primeira senha, token ou chave para começar."}</p>
               <button className="primary-button compact" onClick={onCreate} type="button"><Plus size={17} aria-hidden="true" /> Adicionar credencial</button>
             </div>
           )}

@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { Eye, EyeOff, KeyRound, X } from "lucide-react";
+import { vaultCategories } from "@/lib/vault-categories";
 
 import {
   validateEntryDraft,
@@ -84,12 +85,9 @@ export function CredentialModal({ entry, error, onClose, onSave }: CredentialMod
             <label className="field">
               <span>Categoria</span>
               <select onChange={(event) => update("category", event.target.value as VaultEntryDraft["category"])} value={draft.category}>
-                <option value="site">Site</option>
-                <option value="api">API / token</option>
-                <option value="database">Banco de dados</option>
-                <option value="github">GitHub</option>
-                <option value="vercel">Vercel</option>
-                <option value="other">Outro</option>
+                {vaultCategories.map(({ id, singular }) => (
+                  <option key={id} value={id}>{singular}</option>
+                ))}
               </select>
             </label>
 

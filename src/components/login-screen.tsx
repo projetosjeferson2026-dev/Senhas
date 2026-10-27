@@ -53,7 +53,7 @@ export function LoginScreen({ error, onSubmit }: LoginScreenProps) {
           </div>
           <p className="eyebrow">Acesso pessoal</p>
           <h2>Entrar no Nexus Vault</h2>
-          <p className="muted">Use a conta autorizada no Supabase.</p>
+          <p className="muted">Entre com seu e-mail e senha para acessar o cofre.</p>
 
           <label className="field">
             <span>E-mail</span>

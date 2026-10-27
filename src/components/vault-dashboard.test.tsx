@@ -41,6 +41,20 @@ const callbacks = {
 };
 
 describe("VaultDashboard", () => {
+  it("combines favorites with search and resets the filters", async () => {
+    const user = userEvent.setup();
+    render(<VaultDashboard email="eu@exemplo.com" entries={entries} {...callbacks} />);
+    await user.click(screen.getByRole("button", { name: "Mostrar favoritos" }));
+    expect(screen.getByText("GitHub pessoal")).toBeInTheDocument();
+    expect(screen.queryByText("Supabase produção")).not.toBeInTheDocument();
+    await user.type(screen.getByRole("searchbox"), "Supabase");
+    expect(screen.queryByText("GitHub pessoal")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Limpar filtros" }));
+    expect(screen.getByRole("searchbox")).toHaveValue("");
+    expect(screen.getByText("GitHub pessoal")).toBeInTheDocument();
+    expect(screen.getByText("Supabase produção")).toBeInTheDocument();
+  });
+
   it("filters decrypted entries by category", async () => {
     const user = userEvent.setup();
     render(

@@ -1,33 +1,121 @@
 # Nexus Vault
 
-Cofre pessoal em Next.js com autenticação Supabase e criptografia AES-256-GCM no navegador. O banco recebe apenas conteúdo cifrado, IV e metadados técnicos.
+[![CI](https://github.com/projetosjeferson2026-dev/Senhas/actions/workflows/ci.yml/badge.svg)](https://github.com/projetosjeferson2026-dev/Senhas/actions/workflows/ci.yml)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 
-## Configuração
+Cofre pessoal de credenciais para um único usuário autorizado. Senhas, tokens e chaves são
+cifrados **no navegador** e o Supabase recebe apenas texto cifrado, IV e metadados técnicos.
 
-1. No Supabase, execute `supabase/migrations/001_nexus_vault.sql` no SQL Editor.
-2. Crie manualmente seu usuário em Authentication e desative novos cadastros.
-3. Autorize somente esse usuário no SQL Editor, substituindo o e-mail:
+## Modelo de segurança
+
+- **Derivação de chave:** PBKDF2-SHA256 com 600.000 iterações e salt aleatório de 32 bytes.
+- **Criptografia:** AES-256-GCM, IV aleatório de 12 bytes por item, AAD fixo `nexus-vault:v1`.
+- **Senha-mestra:** nunca sai do dispositivo e não é armazenada em lugar nenhum. O banco guarda
+  somente um *verifier* cifrado, usado para detectar senha-mestra incorreta.
+- **Banco:** o Supabase armazena `ciphertext`, `iv` e `crypto_version`. Nenhum campo legível existe.
+- **Autorização:** RLS em todas as tabelas + tabela `vault_authorized_users`, que precisa conter o
+  UID do usuário para qualquer leitura ou escrita. A lista é mantida apenas pelo SQL Editor.
+- **Sessão:** token do Supabase no navegador (sessão persistida) e bloqueio automático do cofre
+  após 5 minutos sem interação.
+- **Superfície:** CSP restritiva, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, HSTS em
+  produção e área restrita a um único e-mail.
+
+> A variável `NEXT_PUBLIC_ALLOWED_EMAIL` é apenas uma checagem de conveniência na interface. A
+> barreira real de segurança são as políticas RLS do banco.
+
+## Stack
+
+| Camada    | Escolha                                            |
+| --------- | -------------------------------------------------- |
+| Framework | Next.js 16 (App Router, Turbopack, Cache Components) |
+| UI        | React 19 + Tailwind CSS 4 + lucide-react           |
+| Dados     | Supabase (Authentication + Postgres com RLS)       |
+| Cripto    | Web Crypto API (PBKDF2 + AES-GCM)                  |
+| Testes    | Vitest + Testing Library + jsdom                   |
+
+## Estrutura
+
+```
+src/app/          App Router: layout, página única e estilos globais
+src/components/   Telas e componentes de interface (testes ao lado de cada arquivo)
+src/lib/          Criptografia, modelo do cofre, backend Supabase
+supabase/         Migration SQL com tabelas, grants e políticas RLS
+.github/          Workflow de CI
+```
+
+## Como rodar
+
+Requisitos: Node.js 24 (veja `.nvmrc`) e um projeto Supabase.
+
+```bash
+npm ci
+cp .env.example .env.local   # preencha as três variáveis
+npm run dev
+```
+
+### 1. Banco de dados
+
+Execute `supabase/migrations/001_nexus_vault.sql` no SQL Editor do Supabase. O script cria as
+tabelas, habilita RLS, revoga acesso de `anon` e aplica as políticas.
+
+### 2. Usuário
+
+Crie manualmente seu usuário em **Authentication → Users** e desative novos cadastros
+(*Authentication → Providers → Email → Allow new users to sign up: off*).
+
+### 3. Allowlist
+
+Autorize o UID desse usuário — sem isso o cofre fica inacessível mesmo com login válido:
 
 ```sql
 insert into public.vault_authorized_users (user_id)
 select id from auth.users where email = 'SEU_EMAIL';
 ```
 
-Essa lista é aplicada pelas políticas RLS no banco; a variável de e-mail da interface não é a barreira de segurança.
+### 4. Variáveis de ambiente
 
-4. Configure na Vercel:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_ALLOWED_EMAIL`
-5. Conecte este repositório ao projeto Vercel. O push para `main` dispara o deploy.
+| Variável                        | Obrigatória | Descrição                              |
+| ------------------------------- | ----------- | -------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | sim         | URL do projeto Supabase                |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | sim         | Chave anônima (publishable)            |
+| `NEXT_PUBLIC_ALLOWED_EMAIL`     | sim         | Único e-mail autorizado a abrir o cofre |
 
-Nunca configure `SUPABASE_SERVICE_ROLE_KEY` no navegador ou no repositório.
+Sem as três variáveis o app mostra a tela de configuração em vez do login.
 
-## Desenvolvimento
+> Nunca coloque a `SUPABASE_SERVICE_ROLE_KEY` no repositório, em variáveis `NEXT_PUBLIC_*` ou no
+> navegador — ela ignora RLS.
 
-```bash
-npm install
-npm test
-npm run lint
-npm run build
-```
+## Scripts
+
+| Comando             | O que faz                                             |
+| ------------------- | ----------------------------------------------------- |
+| `npm run dev`       | Servidor de desenvolvimento                           |
+| `npm run build`     | Build de produção                                     |
+| `npm run start`     | Servidor do build de produção                         |
+| `npm run lint`      | ESLint (config do Next.js, core-web-vitals + TS)      |
+| `npm run typecheck` | Gera os tipos de rota e roda `tsc --noEmit`           |
+| `npm test`          | Testes em Vitest (execução única)                     |
+| `npm run test:watch`| Testes em modo watch                                  |
+
+## CI
+
+Todo push e pull request para `main` roda lint, typecheck, testes e build em Node 24. O workflow
+está em `.github/workflows/ci.yml` e não precisa de nenhum secret.
+
+## Deploy
+
+1. Crie o projeto na Vercel e conecte este repositório.
+2. Configure as três variáveis em **Project → Settings → Environment Variables**.
+3. Push para `main` dispara o deploy.
+
+## Limitações conhecidas
+
+- A senha-mestra **não é recuperável**. Esquecê-la significa perder o acesso ao conteúdo do cofre.
+- O app atende um único e-mail; não há cadastro público, compartilhamento ou multiusuário.
+- O bloqueio automático é do lado do cliente: recarregar a página exige desbloquear novamente.
+- Recursos do navegador como `navigator.clipboard` exigem HTTPS (ou `localhost`).
+
+## Licença
+
+Projeto pessoal, sem licença de uso público.

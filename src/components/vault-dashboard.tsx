@@ -3,17 +3,20 @@
 import { useMemo, useState } from "react";
 import { Copy, Edit3, Eye, EyeOff, LockKeyhole, LogOut, Plus, Search, ShieldCheck, Star, Trash2 } from "lucide-react";
 import { categoryFilters, getCategory } from "@/lib/vault-categories";
+import { ApiProviderCatalog } from "@/components/api-provider-catalog";
 
 import {
   filterEntries,
   type VaultCategoryFilter,
   type VaultEntry,
+  type VaultEntryDraft,
 } from "@/lib/vault";
 
 type VaultDashboardProps = {
   email: string;
   entries: VaultEntry[];
   onCreate: () => void;
+  onCreateApi?: (draft: VaultEntryDraft) => void;
   onDelete: (entry: VaultEntry) => void;
   onEdit: (entry: VaultEntry) => void;
   onLock: () => void;
@@ -24,6 +27,7 @@ export function VaultDashboard({
   email,
   entries,
   onCreate,
+  onCreateApi,
   onDelete,
   onEdit,
   onLock,
@@ -168,9 +172,13 @@ export function VaultDashboard({
           ))}
         </div>
 
+        {category === "api" ? (
+          <ApiProviderCatalog entries={entries} query={query} favoritesOnly={favoritesOnly} onAdd={onCreateApi ?? onCreate} onEdit={onEdit} />
+        ) : null}
+
         <section className="entries-section">
           <div className="section-heading">
-            <div><h2>{favoritesOnly ? `Favoritos · ${selectedLabel}` : selectedLabel} <span className="section-count">{visibleEntries.length}</span></h2><p>Use Copiar para a senha ou Editar para alterar o item.</p></div>
+            <div><h2>{category === "api" ? "Chaves salvas no cofre" : favoritesOnly ? `Favoritos · ${selectedLabel}` : selectedLabel} <span className="section-count">{visibleEntries.length}</span></h2><p>Use Copiar para a senha ou Editar para alterar o item.</p></div>
             {hasFilters ? <button className="text-button" onClick={resetFilters} type="button">Limpar filtros</button> : null}
           </div>
 

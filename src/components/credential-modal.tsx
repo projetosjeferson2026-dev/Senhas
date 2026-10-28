@@ -12,6 +12,7 @@ import {
 
 type CredentialModalProps = {
   entry: VaultEntry | null;
+  initialDraft?: VaultEntryDraft;
   error?: string;
   onClose: () => void;
   onSave: (draft: VaultEntryDraft) => Promise<void> | void;
@@ -27,10 +28,11 @@ const emptyDraft: VaultEntryDraft = {
   favorite: false,
 };
 
-export function CredentialModal({ entry, error, onClose, onSave }: CredentialModalProps) {
+export function CredentialModal({ entry, initialDraft, error, onClose, onSave }: CredentialModalProps) {
   const [draft, setDraft] = useState<VaultEntryDraft>(
     entry
       ? {
+          providerId: entry.providerId,
           title: entry.title,
           category: entry.category,
           username: entry.username,
@@ -39,7 +41,7 @@ export function CredentialModal({ entry, error, onClose, onSave }: CredentialMod
           notes: entry.notes,
           favorite: entry.favorite,
         }
-      : emptyDraft,
+      : initialDraft ?? emptyDraft,
   );
   const [errors, setErrors] = useState<ReturnType<typeof validateEntryDraft>>({});
   const [showSecret, setShowSecret] = useState(false);

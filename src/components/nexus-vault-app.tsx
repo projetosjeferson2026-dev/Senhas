@@ -32,6 +32,7 @@ export function NexusVaultApp({
   const [vaultKey, setVaultKey] = useState<CryptoKey | null>(null);
   const [entries, setEntries] = useState<VaultEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<VaultEntry | null>(null);
+  const [initialDraft, setInitialDraft] = useState<VaultEntryDraft | undefined>();
   const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [modalError, setModalError] = useState("");
@@ -97,6 +98,7 @@ export function NexusVaultApp({
     setVaultKey(null);
     setEntries([]);
     setEditingEntry(null);
+    setInitialDraft(undefined);
     setModalOpen(false);
     setError("");
     setStatus("locked");
@@ -262,12 +264,20 @@ export function NexusVaultApp({
         entries={entries}
         onCreate={() => {
           setEditingEntry(null);
+          setInitialDraft(undefined);
+          setModalError("");
+          setModalOpen(true);
+        }}
+        onCreateApi={(draft) => {
+          setEditingEntry(null);
+          setInitialDraft(draft);
           setModalError("");
           setModalOpen(true);
         }}
         onDelete={handleDeleteEntry}
         onEdit={(entry) => {
           setEditingEntry(entry);
+          setInitialDraft(undefined);
           setModalError("");
           setModalOpen(true);
         }}
@@ -277,6 +287,7 @@ export function NexusVaultApp({
       {modalOpen ? (
         <CredentialModal
           entry={editingEntry}
+          initialDraft={initialDraft}
           error={modalError}
           onClose={() => setModalOpen(false)}
           onSave={handleSaveEntry}

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { NexusVaultApp } from "@/components/nexus-vault-app";
-import { encryptJson } from "@/lib/crypto";
+import { decryptJson, encryptJson } from "@/lib/crypto";
 import type { SupabaseConfiguration } from "@/lib/supabase";
 import { createVaultProfile, type VaultEntryDraft } from "@/lib/vault";
 import type { VaultBackendPort } from "@/lib/vault-backend";
@@ -25,6 +25,31 @@ function createBackend(overrides: Partial<VaultBackendPort> = {}): VaultBackendP
 }
 
 describe("NexusVaultApp", () => {
+  it("saves a catalog key encrypted and updates its provider status", async () => {
+    const user = userEvent.setup();
+    const masterPassword = "senha-mestra-de-teste-segura";
+    const { key, profile } = await createVaultProfile(masterPassword);
+    const createItem = vi.fn().mockResolvedValue({ id: "cohere-1", createdAt: "2026-10-28", updatedAt: "2026-10-28" });
+    const backend = createBackend({
+      getUser: vi.fn().mockResolvedValue({ id: "1", email: "eu@exemplo.com" }),
+      getProfile: vi.fn().mockResolvedValue(profile), createItem,
+    });
+    render(<NexusVaultApp configuration={{ allowedEmail: "eu@exemplo.com", backend }} />);
+    await user.type(await screen.findByLabelText("Senha-mestra"), masterPassword);
+    await user.click(screen.getByRole("button", { name: "Desbloquear" }));
+    await user.click(await screen.findByRole("button", { name: "APIs0" }));
+    await user.click(screen.getByRole("button", { name: "Adicionar chave de Cohere" }));
+    await user.type(screen.getByLabelText("Senha, token ou chave"), "cohere-test-secret");
+    await user.click(screen.getByRole("button", { name: "Salvar credencial" }));
+    expect(await screen.findByText("Chave salva")).toBeInTheDocument();
+    expect(screen.queryByText("cohere-test-secret")).not.toBeInTheDocument();
+    const payload = createItem.mock.calls[0][0];
+    expect(JSON.stringify(payload)).not.toContain("cohere-test-secret");
+    expect(await decryptJson(key, payload)).toEqual(expect.objectContaining({ providerId: "cohere", secret: "cohere-test-secret" }));
+    await user.click(screen.getByRole("button", { name: "Editar chave de Cohere" }));
+    expect(screen.getByLabelText("Senha, token ou chave")).toHaveValue("cohere-test-secret");
+  });
+
   it("explains which Supabase variables are missing", () => {
     render(<NexusVaultApp configuration={null} />);
     expect(

@@ -19,6 +19,7 @@ export type VaultCategory = (typeof VAULT_CATEGORIES)[number];
 export type VaultCategoryFilter = VaultCategory | "all";
 
 export type VaultEntryDraft = {
+  providerId?: string;
   title: string;
   category: VaultCategory;
   username: string;

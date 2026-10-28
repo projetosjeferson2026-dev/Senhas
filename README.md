@@ -102,6 +102,22 @@ Sem as três variáveis o app mostra a tela de configuração em vez do login.
 
 ## Uso no dia a dia
 
+Na categoria **APIs**, o catálogo de IA reúne OpenRouter, Cohere, Google Gemini,
+Groq, Mistral AI, Cerebras, Cloudflare Workers AI, NVIDIA NIM, Nous Portal e OrcaRouter.
+Cada cartão contém o link do painel, a variável sugerida e as condições do acesso
+gratuito ou de avaliação, revisadas em 28/10/2026. As condições podem mudar; use o
+link **Condições** para consultar a fonte oficial.
+
+Clique em **Adicionar chave**, cole seu token e salve. O cartão ganha um contorno
+neon suave e a indicação **Chave salva**. Isso indica armazenamento, sem validar a
+chave nem consumir tokens. Use **Gerenciar chave** para editar e a lista abaixo para
+copiar ou excluir. É possível manter várias credenciais por provedor.
+
+O vínculo com o provedor fica dentro do conteúdo criptografado, junto com o token.
+Nenhuma chave é enviada aos provedores pelo catálogo. Nous Portal e OrcaRouter
+permanecem sinalizados para conferir condições: um plano de portal/gateway gratuito
+não garante inferência gratuita pela API.
+
 1. Entre com a conta autorizada e desbloqueie usando a senha-mestra.
 2. Clique em **Novo item** para salvar uma senha, token ou chave.
 3. Use a pesquisa, as categorias ou **Favoritos** para encontrar suas credenciais.

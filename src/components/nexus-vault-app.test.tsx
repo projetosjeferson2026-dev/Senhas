@@ -38,6 +38,7 @@ describe("NexusVaultApp", () => {
     await user.type(await screen.findByLabelText("Senha-mestra"), masterPassword);
     await user.click(screen.getByRole("button", { name: "Desbloquear" }));
     await user.click(await screen.findByRole("button", { name: "APIs0" }));
+    await user.selectOptions(screen.getByLabelText("Provedor de IA"), "cohere");
     await user.click(screen.getByRole("button", { name: "Adicionar chave de Cohere" }));
     await user.type(screen.getByLabelText("Senha, token ou chave"), "cohere-test-secret");
     await user.click(screen.getByRole("button", { name: "Salvar credencial" }));

@@ -11,10 +11,25 @@ const saved: VaultEntry = {
 };
 
 describe("ApiProviderCatalog", () => {
+  it("keeps providers collapsed until one is selected and shows only that provider", async () => {
+    const user = userEvent.setup();
+    render(<ApiProviderCatalog entries={[saved]} query="" favoritesOnly={false} onAdd={vi.fn()} onEdit={vi.fn()} />);
+    expect(screen.queryByRole("article")).not.toBeInTheDocument();
+    const selector = screen.getByRole("combobox", { name: "Provedor de IA" });
+    expect(within(selector).getByRole("option", { name: /OpenRouter.*Chave salva/ })).toBeInTheDocument();
+    await user.selectOptions(selector, "cohere");
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    expect(screen.getByRole("article", { name: "Cohere" })).toBeInTheDocument();
+    await user.selectOptions(selector, "groq");
+    expect(screen.queryByRole("article", { name: "Cohere" })).not.toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Groq" })).toBeInTheDocument();
+  });
+
   it("opens a provider draft without creating an empty vault entry", async () => {
     const user = userEvent.setup();
     const onAdd = vi.fn();
     render(<ApiProviderCatalog entries={[]} query="cohere" favoritesOnly={false} onAdd={onAdd} onEdit={vi.fn()} />);
+    await user.selectOptions(screen.getByLabelText("Provedor de IA"), "cohere");
     await user.click(screen.getByRole("button", { name: "Adicionar chave de Cohere" }));
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
       providerId: "cohere", category: "api", username: "COHERE_API_KEY", secret: "",
@@ -25,6 +40,7 @@ describe("ApiProviderCatalog", () => {
     const onEdit = vi.fn();
     const user = userEvent.setup();
     render(<ApiProviderCatalog entries={[saved]} query="" favoritesOnly onAdd={vi.fn()} onEdit={onEdit} />);
+    await user.selectOptions(screen.getByLabelText("Provedor de IA"), "openrouter");
     const card = screen.getByRole("article", { name: "OpenRouter" });
     expect(within(card).getByText("Chave salva")).toBeInTheDocument();
     expect(screen.queryByText(saved.secret)).not.toBeInTheDocument();
@@ -33,11 +49,13 @@ describe("ApiProviderCatalog", () => {
     expect(onEdit).toHaveBeenCalledWith(saved);
   });
 
-  it("matches legacy keys by exact provider title and removes saved status after deletion", () => {
+  it("matches legacy keys by exact provider title and removes saved status after deletion", async () => {
+    const user = userEvent.setup();
     const legacy = { ...saved, providerId: undefined, title: "OpenRouter", favorite: false };
     const props = { query: "openrouter", favoritesOnly: false, onAdd: vi.fn(), onEdit: vi.fn() };
     const { rerender } = render(<ApiProviderCatalog {...props} entries={[legacy]} />);
-    expect(screen.getByText("Chave salva")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Provedor de IA"), "openrouter");
+    expect(within(screen.getByRole("article")).getByText("Chave salva")).toBeInTheDocument();
     rerender(<ApiProviderCatalog {...props} entries={[]} />);
     expect(screen.queryByText("Chave salva")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Adicionar chave de OpenRouter" })).toBeInTheDocument();

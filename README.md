@@ -108,7 +108,11 @@ Cada cartão contém o link do painel, a variável sugerida e as condições do 
 gratuito ou de avaliação, revisadas em 28/10/2026. As condições podem mudar; use o
 link **Condições** para consultar a fonte oficial.
 
-Clique em **Adicionar chave**, cole seu token e salve. O cartão ganha um contorno
+Escolha um provedor no **dropdown** para ver somente os detalhes dele. A lista
+começa recolhida, sem ocupar a página com todos os provedores. O menu também indica
+quais já têm chave salva. Expanda **Sobre o acesso gratuito** para consultar os detalhes.
+
+Clique em **Adicionar chave**, cole seu token e salve. O painel ganha um contorno
 neon suave e a indicação **Chave salva**. Isso indica armazenamento, sem validar a
 chave nem consumir tokens. Use **Gerenciar chave** para editar e a lista abaixo para
 copiar ou excluir. É possível manter várias credenciais por provedor.
